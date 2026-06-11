@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Artifact Collector</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="wrap">
+    <h1>Artifact Collector</h1>
+    <p id="status">Loading...</p>
+
+    <div class="grid">
+      <button id="startBtn">Start</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="captureBtn">Capture Current Page</button>
+      <button id="exportBtn">Export ZIP</button>
+      <button id="exportJsonBtn">Export JSON (for extraction)</button>
+      <button id="clearBtn" class="danger">Clear</button>
+    </div>
+
+    <div class="stats">
+      <div><b>Session:</b> <span id="sessionId">-</span></div>
+      <div><b>Captured pages:</b> <span id="count">0</span></div>
+      <div><b>Mode:</b> <span id="mode">-</span></div>
+    </div>
+
+    <p class="hint">
+      Start capture, browse pages, then export. OCR is not performed live.
+    </p>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

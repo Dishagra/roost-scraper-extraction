@@ -1,0 +1,32 @@
+body {
+  width: 330px;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+  color: #111;
+}
+.wrap { padding: 14px; }
+h1 { font-size: 18px; margin: 0 0 8px; }
+#status { margin: 8px 0 12px; font-size: 13px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 10px;
+  cursor: pointer;
+  background: #111;
+  color: white;
+  font-size: 13px;
+}
+button:hover { opacity: 0.88; }
+button:disabled { background: #aaa; cursor: not-allowed; }
+button.danger { background: #b42318; }
+.stats {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background: white;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.hint { font-size: 11px; color: #555; }
