@@ -6,6 +6,7 @@ import csv
 import sys
 import argparse
 import uuid
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any
@@ -155,6 +156,7 @@ def main():
     parser.add_argument('--output', default='inventory_extracted.csv', help='Output CSV path')
     parser.add_argument('--gazetteer', default='gazetteer.csv', help='Locality gazetteer CSV')
     parser.add_argument('--dry-run', action='store_true', help='Parse only, no output')
+    parser.add_argument('--open', action='store_true', help='Open CSV in Excel after extraction')
 
     args = parser.parse_args()
 
@@ -202,6 +204,14 @@ def main():
         writer.writerows(listings)
 
     print(f"Wrote {len(listings)} to {args.output}", file=sys.stderr)
+
+    # Open in Excel if requested
+    if args.open:
+        try:
+            subprocess.Popen(['open', '-a', 'Microsoft Excel', args.output])
+            print(f"Opening {args.output} in Excel...", file=sys.stderr)
+        except FileNotFoundError:
+            print(f"Excel not found, but file saved to {args.output}", file=sys.stderr)
 
 
 if __name__ == '__main__':

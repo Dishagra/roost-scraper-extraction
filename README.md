@@ -5,11 +5,17 @@ Converts FB group capture data → validated inventory CSV ready for Supabase im
 ## Usage
 
 ```bash
-python extract.py captures.json --output inventory_extracted.csv
+# Extract and open in Excel immediately
+python extract.py captures.json --open
+
+# Or save to custom path
+python extract.py captures.json --output my_inventory.csv --open
 ```
 
 Input: JSON export from extension (metadata + captures array).
 Output: CSV matching DATA_MODEL.md Tier 1/2 fields with confidence flags.
+
+**--open** flag opens result in Excel automatically.
 
 ## Flow
 
