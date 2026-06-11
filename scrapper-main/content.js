@@ -1,65 +1,96 @@
 (() => {
-  function getVisibleText() {
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-      acceptNode(node) {
-        const text = node.nodeValue.trim();
-        if (!text) return NodeFilter.FILTER_REJECT;
-        const parent = node.parentElement;
-        if (!parent) return NodeFilter.FILTER_REJECT;
-        const style = window.getComputedStyle(parent);
-        if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") {
-          return NodeFilter.FILTER_REJECT;
+  // Guard: script may be injected more than once.
+  if (window.__roostCollector) return;
+  window.__roostCollector = true;
+
+  let captureMode = false;
+  let scrollTimer = null;
+  const sentHashes = new Set(); // don't resend posts already pushed this page-visit
+
+  function postHash(text) {
+    let hash = 0;
+    const s = text.replace(/\s+/g, " ").slice(0, 400);
+    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) | 0;
+    return hash.toString(36);
+  }
+
+  // FB feed posts live in div[role="article"]. Each becomes one record.
+  // Passive DOM read only — no clicks, no auto-scroll, no requests.
+  function getPosts() {
+    const articles = [...document.querySelectorAll('div[role="article"]')];
+    const posts = [];
+
+    for (const article of articles) {
+      const text = (article.innerText || "").trim();
+      if (text.length < 40) continue; // UI noise / stubs
+
+      const hash = postHash(text);
+      if (sentHashes.has(hash)) continue;
+
+      // Content photos only (skip emoji, icons, profile pics)
+      const images = [...article.querySelectorAll("img")]
+        .map((img) => ({
+          src: img.currentSrc || img.src,
+          width: img.naturalWidth || img.width || 0,
+          height: img.naturalHeight || img.height || 0
+        }))
+        .filter((img) =>
+          img.src &&
+          !img.src.includes("emoji") &&
+          !img.src.includes("static") &&
+          img.width >= 100 && img.height >= 100
+        )
+        .map((img) => img.src);
+
+      let permalink = "";
+      for (const a of article.querySelectorAll("a[href]")) {
+        const href = a.href || "";
+        if (href.includes("/posts/") || href.includes("/permalink/") || href.includes("story_fbid=")) {
+          permalink = href.split("?")[0];
+          break;
         }
-        return NodeFilter.FILTER_ACCEPT;
       }
-    });
 
-    const parts = [];
-    while (walker.nextNode()) parts.push(walker.currentNode.nodeValue.trim());
-    return [...new Set(parts)].join("\n");
+      sentHashes.add(hash);
+      posts.push({ text, images: [...new Set(images)], permalink });
+    }
+
+    return posts;
   }
 
-  function getMeta() {
-    return [...document.querySelectorAll("meta")].map((m) => ({
-      name: m.getAttribute("name"),
-      property: m.getAttribute("property"),
-      content: m.getAttribute("content")
-    })).filter(m => m.name || m.property || m.content);
-  }
-
-  function getImages() {
-    return [...document.images].map((img) => ({
-      src: img.currentSrc || img.src,
-      alt: img.alt || "",
-      width: img.naturalWidth || img.width || null,
-      height: img.naturalHeight || img.height || null
-    })).filter(img => img.src);
-  }
-
-  function collectArtifacts() {
-    return {
-      url: location.href,
-      title: document.title,
-      capturedAt: new Date().toISOString(),
-      visibleText: getVisibleText(),
-      bodyInnerText: document.body ? document.body.innerText : "",
-      htmlSnapshot: document.documentElement.outerHTML,
-      imageUrls: getImages(),
-      meta: getMeta(),
-      viewport: {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        scrollX: window.scrollX,
-        scrollY: window.scrollY,
-        devicePixelRatio: window.devicePixelRatio
+  function collectAndSend() {
+    const posts = getPosts();
+    if (!posts.length) return;
+    chrome.runtime.sendMessage({
+      type: "POSTS_COLLECTED",
+      data: {
+        url: location.href,
+        title: document.title,
+        capturedAt: new Date().toISOString(),
+        posts
       }
-    };
+    }).catch(() => {});
   }
+
+  function onScroll() {
+    if (!captureMode) return;
+    clearTimeout(scrollTimer);
+    // Collect 1.5s after scrolling settles — new posts have rendered by then.
+    scrollTimer = setTimeout(collectAndSend, 1500);
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "SET_CAPTURE_MODE") {
+      captureMode = !!message.enabled;
+      if (captureMode) collectAndSend(); // grab whatever is on screen right now
+      sendResponse({ ok: true, captureMode });
+    }
     if (message.type === "COLLECT_ARTIFACTS") {
       try {
-        sendResponse({ ok: true, data: collectArtifacts() });
+        collectAndSend();
+        sendResponse({ ok: true });
       } catch (error) {
         sendResponse({ ok: false, error: error.message });
       }

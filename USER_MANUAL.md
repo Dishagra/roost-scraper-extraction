@@ -1,69 +1,62 @@
-# User Manual — Roost Scraper
+# User Manual — Roost Collector
 
-FB capture → extraction → Excel → import.
+Scroll FB → CSV in Downloads → review in Excel. That's the whole pipeline.
 
 ---
 
-## Setup (One-Time)
+## Setup (one-time)
 
-**Load extension:**
 ```
-Chrome → chrome://extensions → Developer mode
+Chrome → chrome://extensions → Developer mode ON
 Load unpacked → /Users/Dishagra/Documents/roost-scraper-extraction/scrapper-main/
 ```
 
----
-
-## Daily Workflow
-
-### 1. Capture (10 min)
-- Open FB group
-- Extension popup: "Start"
-- Scroll 30+ posts
-- "Pause" → "Export JSON"
-- Downloads: `session_XXXX.json`
-
-### 2. Extract (1 min)
-```bash
-python /Users/Dishagra/Documents/roost-scraper-extraction/extract.py \
-  ~/Downloads/session_*.json --open
-```
-Opens CSV in Excel automatically. Columns: phone, rent, BHK, furnishing, locality, lat/lng, validation_status.
-
-### 3. Validate (5 min, optional)
-Review in Excel:
-- Phone: 10-digit, starts 6-9?
-- Rent: numeric or null/"ask"?
-- Locality: recognized?
-- Bad rows: set `validation_status=rejected`
-
-### 4. Import
-```bash
-python /Users/Dishagra/Documents/Roost/v1/backend/importer/import_inventory.py \
-  extracted.csv
-```
+Already loaded it before? Click the reload icon (circular arrow) on the extension card to pick up this version.
 
 ---
 
-## Components
+## Daily use
 
-**Extension (scrapper-main/)**
-- Manual capture while browsing (human profile, FB safe)
-- Stores in browser memory
-- Exports JSON with URL, text, images
+1. Open a FB rental group
+2. Extension popup → **Start**
+3. Scroll the feed at your normal pace. Watch "Posts captured" tick up in the popup.
+4. Done? Popup → **Pause & Export CSV**
+5. `roost_listings_<date>.csv` is in Downloads. Double-click → Excel.
 
-**Extraction (extract.py)**
-- Input: JSON from extension
-- Output: CSV with phone, rent, BHK, furnishing, locality, coords, confidence flags
-- Phone regex: `[6-9]\d{9}`
-- Rent: `₹5000/month` → 5000
-- Locality: fuzzy match vs gazetteer
-- `--open` flag: open Excel automatically
+Repeat per group. Each export contains everything captured since the last **Clear All** — so you can do 5 groups, then export once.
 
-**Gazetteer (gazetteer.csv)**
-- Localities: Gachibowli, Madhapur, Kondapur + sub-areas
-- Maps to corridor + lat/lng
-- Fuzzy match: "gachibowli" = "gachbowli"
+---
+
+## Reviewing in Excel
+
+Each row = one FB post, already parsed:
+
+| Column | What to check |
+|--------|---------------|
+| phone | 10 digits, starts 6–9. Blank = post had no number. |
+| rent | Number, or blank with rent_raw="ask". Sanity-check (₹2,500 Gachibowli 2BHK = parse error). |
+| locality_name / corridor | Auto-matched. Blank = locality not in gazetteer. |
+| bhk, furnishing, tenant_pref, poster_kind | Spot-check vs raw_text. |
+| notes | **Read this first.** Flags "looking for" posts and suspected reposts. |
+| validation_status | Set `validated` for good rows, `rejected` + reject_reason for bad. |
+
+Keep the file — it's your inventory DB. When Supabase is up, the same file imports directly:
+
+```bash
+python /Users/Dishagra/Documents/Roost/v1/backend/importer/import_inventory.py roost_listings_<date>.csv
+```
+
+---
+
+## Buttons
+
+| Button | Does |
+|--------|------|
+| Start | Begin capturing on the current tab (and any FB page you open after) |
+| Pause & Export CSV | Stop capturing + download the CSV in one click |
+| Export CSV Now | Download CSV without stopping |
+| Export JSON (backup) | Raw capture data, for debugging |
+| Clear All | Wipe captured posts (do this after a successful export + review) |
 
 ---
 
@@ -71,21 +64,20 @@ python /Users/Dishagra/Documents/Roost/v1/backend/importer/import_inventory.py \
 
 | Problem | Fix |
 |---------|-----|
-| Extension not capturing | Enabled in chrome://extensions? Refresh page after "Start". Wait 1-2s. |
-| Phone not extracted | Check visible text. Format: `9876543210` or `+91-9876543210` |
-| Locality not recognized | Check gazetteer. Add aliases for misspellings. Sets geo_precision=null if not found. |
-| Import fails | Check Supabase credentials (service role key). CSV columns match schema. |
+| Posts captured stays 0 | Reload extension at chrome://extensions, refresh the FB tab, Start again, scroll a bit. |
+| CSV has weird ₹ symbols | Open via Excel File→Open (file has BOM, should be fine); avoid TextEdit. |
+| Locality blank | Area not in gazetteer. Add to gazetteer.csv AND the GAZETTEER list in scrapper-main/extraction.js. |
+| "looking for" rows | Renter posts, not listings. notes column flags them — reject. |
+| Repost rows | notes says "possible repost"; both rows share dedup_group_id. Keep one. |
 
 ---
 
-## Targets
+## Safety
 
-≥150 validated listings in 3 corridors. 50 posts/day = 7–10 days to launch.
+- Captures only what renders on your screen while **you** scroll
+- No auto-scroll, no clicking, no requests sent to FB
+- Indistinguishable from normal browsing — keep scroll pace human and session lengths reasonable (10–15 min per group)
 
-## V2 (Future)
+## Target
 
-- Auto-scroll (less manual)
-- OCR (higher confidence)
-- NLP locality parsing
-- Commute rank
-- First-party form
+≥150 validated listings across Gachibowli / Madhapur / Kondapur ≈ 50 posts/day for ~2 weeks.
