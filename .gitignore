@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.DS_Store
+*.json
+*.csv
+!gazetteer.csv
+!test_sample.json
+!test_output.csv
+.env
+.venv
+venv/
+.idea/
+*.egg-info/
+dist/
+build/

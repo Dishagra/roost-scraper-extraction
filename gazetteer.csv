@@ -1,0 +1,41 @@
+name,kind,corridor,lat,lng,aliases,notes
+Gachibowli,locality,Gachibowli,17.4401,78.3489,gachibowli|gachbowli,verify
+Nanakramguda,locality,Gachibowli,17.4180,78.3370,nanakram guda,verify
+Kokapet,locality,Gachibowli,17.4097,78.3262,kokapet|neopolis,verify
+Financial District,locality,Gachibowli,17.4156,78.3414,fin district|fd,verify
+Khajaguda,locality,Gachibowli,,,khaja guda,fill
+Manikonda,locality,Gachibowli,17.4057,78.3815,,verify
+Narsingi,locality,Gachibowli,,,,fill
+Madhapur,locality,Madhapur,17.4486,78.3908,madapur,verify
+HITEC City,locality,Madhapur,17.4480,78.3760,hitech city|hi-tec|cyber city,verify
+Kavuri Hills,locality,Madhapur,,,kavuri,fill
+Ayyappa Society,locality,Madhapur,,,,fill
+Image Gardens,locality,Madhapur,,,,fill
+Kondapur,locality,Kondapur,17.4647,78.3620,,verify
+Nallagandla,locality,Kondapur,17.4565,78.3290,nallaganda,verify
+Gachibowli ORR,locality,Kondapur,,,,fill
+Serilingampally,locality,Kondapur,,,seri|serilingampalli,fill
+Microsoft,landmark,Gachibowli,17.4435,78.3540,ms|microsoft idc,verify
+Amazon,landmark,Gachibowli,17.4180,78.3370,,verify
+Google,landmark,Gachibowli,17.4230,78.3470,,verify
+Wipro,landmark,Gachibowli,17.4300,78.3450,,verify
+Infosys,landmark,Gachibowli,17.4390,78.3360,,verify
+Deloitte USI,landmark,Gachibowli,17.4196,78.3357,deloitte,verify
+IIIT Hyderabad,landmark,Gachibowli,17.4454,78.3494,iiit-h|iiit,verify
+ISB Hyderabad,landmark,Gachibowli,17.4350,78.3380,isb,verify
+Cult.fit Gachibowli,landmark,Gachibowli,17.4410,78.3505,cult gachibowli,verify
+Blue Tokai Coffee,landmark,Gachibowli,17.4420,78.3510,blue tokai,verify
+DLF,landmark,Gachibowli,,,dlf cyber city,fill
+Mindspace,landmark,Madhapur,17.4350,78.3830,mind space,verify
+Salesforce,landmark,Madhapur,17.4320,78.3820,,verify
+Inorbit Mall,landmark,Madhapur,17.4346,78.3870,inorbit,verify
+HITEC City Metro,landmark,Madhapur,17.4480,78.3800,hitec metro,verify
+Durgam Cheruvu Metro,landmark,Madhapur,17.4420,78.3905,durgam metro,verify
+Raidurg Metro,landmark,Madhapur,17.4150,78.3870,raidurg,verify
+Gold's Gym Madhapur,landmark,Madhapur,17.4490,78.3830,golds gym,verify
+Durgam Cheruvu,landmark,Madhapur,17.4300,78.3930,durgam cheruvu lake,verify
+Botanical Garden,landmark,Madhapur,17.4180,78.3760,botanical,verify
+Cyber Towers,landmark,Madhapur,,,cyber towers,fill
+Cult.fit Kondapur,landmark,Kondapur,17.4640,78.3640,cult kondapur,verify
+Forum Sujana Mall,landmark,Kondapur,17.4570,78.3240,forum mall|sujana,verify
+Nallagandla Lake,landmark,Kondapur,17.4570,78.3290,,verify
